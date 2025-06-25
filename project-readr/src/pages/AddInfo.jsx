@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { UserAuth } from "../context/AuthContext";
 import { supabase } from "../supabaseClient";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom"
 
 import "./AddInfo.css";
 
@@ -10,6 +11,7 @@ export function AddInfo() {
   const fileInputRef = useRef(null);
   const { session, insertUser } = UserAuth();
   const user = session?.user;
+  const navigate = useNavigate();
 
   //initialization user's info
   const [formData, setFormData] = useState({
@@ -59,8 +61,7 @@ export function AddInfo() {
       return;
     }
 
-    // Validate file size (e.g., max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       setError("File size must be less than 5MB.");
       return;
@@ -152,7 +153,7 @@ export function AddInfo() {
         full_name: formData.full_name || null,
         display_name: formData.display_name || null,
         bio: formData.bio || null,
-        profile_image: formData.profile_image || null, // This should not be null if upload succeeded
+        profile_image: formData.profile_image || null, 
         location: formData.location || null,
         website_url: formData.website_url || null,
         gender: formData.gender || null,
@@ -165,6 +166,7 @@ export function AddInfo() {
       const result = await insertUser(userData);
 
       if (result.success) {
+        navigate('/Homepage');
         setSuccess("User profile created successfully!");
         setFormData({
           email: "",
@@ -227,12 +229,6 @@ export function AddInfo() {
             accept="image/*"
             className="hidden"
           />
-          {/* Debug info - remove in production */}
-          {formData.profile_image && (
-            <small style={{display: 'block', marginTop: '5px', color: 'green'}}>
-              Image URL: {formData.profile_image}
-            </small>
-          )}
         </div>
 
         {/* Email */}
@@ -321,7 +317,7 @@ export function AddInfo() {
             onChange={handleInputChange}
             required
           >
-            <option value="">Select Gender (Optional)</option>
+            <option value=""></option>
             <option value="male">Male</option>
             <option value="female">Female</option>
             <option value="other">Other</option>
