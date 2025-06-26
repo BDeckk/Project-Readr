@@ -82,7 +82,10 @@
     color: #dc2626;
     text-align: center;
     position: absolute;
-    top: 460px;
+    padding: 1%;
+    background-color: transparent;
+    border: 0;
+    top: 465px;
     left: 57px;
     width: 272px;
 }

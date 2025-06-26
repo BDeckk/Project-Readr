@@ -68,7 +68,7 @@ export function AddInfo() {
     }
 
     setUploading(true);
-    setError(""); // Clear any previous errors
+    setError("");
 
     try {
       const fileExt = file.name.split('.').pop();
@@ -308,7 +308,7 @@ export function AddInfo() {
           />
         </div>
 
-        {/* Gender - Updated with proper options */}
+        {/* Gender */}
         <div className="form-group">
           <label>Gender</label>
           <select

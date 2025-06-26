@@ -56,7 +56,7 @@ export function Profile() {
 
   const formatGender = (gender) => {
     if (!gender) return 'Not specified';
-    return gender.charAt(0).toUpperCase() + gender.slice(1).replace('_', ' ');
+    return gender.charAt(0).toUpperCase() + gender.slice(1).replaceAll('_', ' ');
   };
 
   const handleSignOut = async () => {

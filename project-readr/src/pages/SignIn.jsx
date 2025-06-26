@@ -67,7 +67,7 @@ export function SignIn(){
                             <span className="tracking-[0.23px]">{greeting.split('Readr')[0]}<span className="readr-title">Readr</span>{greeting.split('Readr')[1] || ''}</span>
                         </p>
                     </div>
-                    <form onSubmit={handleSignIn}>
+                    <form onSubmit={handleSignIn} className="signin-form">
                         <div className="input-group email-input">
                             <label>Email</label>
                             <input 
@@ -86,18 +86,23 @@ export function SignIn(){
                                 placeholder="Enter your password" 
                             />
                         </div>
+
                         {error && <p className="error-message">{error}</p>}
+
                         <button 
                             type="submit" 
                             disabled={loading} 
                             className="signin-button"
                         >
-                            Sign In
+                            {loading ? "Signing In..." : "Sign In"}
                         </button>
                     </form>
+
                     <p className="signin-link">
                         Don't have an account? <Link to="/SignUp">Sign up!</Link>
                     </p>
+
+
                 </div>
                 <div className="signin-image-container">
                     <img src="/LibraryPic.png" alt="Library" className="signin-image" />

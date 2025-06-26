@@ -260,6 +260,7 @@
   color: #007bff;
   text-decoration: none;
   font-size: 15px;
+  text-align: right;
   transition: color 0.2s ease;
 }
 
