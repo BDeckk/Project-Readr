@@ -180,7 +180,11 @@ export function AddInfo() {
           birth_date: "",
           is_private: false,
         });
+<<<<<<< Updated upstream
         navigate("/SignIn");
+=======
+        navigate("/");
+>>>>>>> Stashed changes
       } else {
         setError(result.error?.message || "Failed to create user profile");
         console.error("Insert user error:", result.error);
@@ -361,6 +365,7 @@ export function AddInfo() {
           type="submit"
           disabled={loading || uploading}
           className={`submit-button ${loading ? "loading" : ""}`}
+          onClick={handleSubmit}
         >
           {loading ? "Creating Profile..." : uploading ? "Please wait (uploading image)..." : "Create Profile"}
         </button>
