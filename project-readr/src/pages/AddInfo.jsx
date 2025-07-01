@@ -181,7 +181,11 @@ export function AddInfo() {
           is_private: false,
         });
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         navigate("/SignIn");
+=======
+        navigate("/");
+>>>>>>> Stashed changes
 =======
         navigate("/");
 >>>>>>> Stashed changes
