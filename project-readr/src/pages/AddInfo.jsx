@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { UserAuth } from "../context/AuthContext";
 import { supabase } from "../supabaseClient";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 
 import "./AddInfo.css";
 
@@ -11,6 +11,7 @@ export function AddInfo() {
   const fileInputRef = useRef(null);
   const { session, insertUser } = UserAuth();
   const user = session?.user;
+
   const navigate = useNavigate();
 
   //initialization user's info
@@ -179,6 +180,7 @@ export function AddInfo() {
           birth_date: "",
           is_private: false,
         });
+        navigate("/SignIn");
       } else {
         setError(result.error?.message || "Failed to create user profile");
         console.error("Insert user error:", result.error);
