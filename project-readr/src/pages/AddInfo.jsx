@@ -15,7 +15,6 @@ export function AddInfo() {
 
   const navigate = useNavigate();
 
-  const navigate = useNavigate();
   //initialization user's info
   const [formData, setFormData] = useState({
     email: "",
