@@ -13,7 +13,7 @@ export const Homepage = () => {
   const [recommendationsLoading, setRecommendationsLoading] = useState(true);
   const [userReadingList, setUserReadingList] = useState([]);
   const [recommendationBasis, setRecommendationBasis] = useState('');
-  
+
   const navigate = useNavigate();
   const recommendationsRef = useRef(null);
   
@@ -74,6 +74,47 @@ export const Homepage = () => {
       status: "COMPLETED"
     }
   ];
+
+  // Check if recommendations are already cached for this session
+  const getSessionRecommendations = () => {
+    try {
+      const cached = sessionStorage.getItem('sessionRecommendations');
+      const cachedBasis = sessionStorage.getItem('sessionRecommendationBasis');
+      
+      if (cached && cachedBasis) {
+        const recommendations = JSON.parse(cached);
+        if (recommendations.length > 0) {
+          return {
+            recommendations,
+            basis: cachedBasis
+          };
+        }
+      }
+    } catch (error) {
+      console.error('Error reading session recommendations:', error);
+    }
+    return null;
+  };
+
+  // Cache recommendations for this session
+  const setSessionRecommendations = (recommendations, basis) => {
+    try {
+      sessionStorage.setItem('sessionRecommendations', JSON.stringify(recommendations));
+      sessionStorage.setItem('sessionRecommendationBasis', basis);
+    } catch (error) {
+      console.error('Error caching session recommendations:', error);
+    }
+  };
+
+  // Clear session recommendations (useful for manual refresh)
+  const clearSessionRecommendations = () => {
+    try {
+      sessionStorage.removeItem('sessionRecommendations');
+      sessionStorage.removeItem('sessionRecommendationBasis');
+    } catch (error) {
+      console.error('Error clearing session recommendations:', error);
+    }
+  };
 
   // Load user's reading list from localStorage and potentially from API
   const loadUserReadingList = async () => {
@@ -313,11 +354,24 @@ export const Homepage = () => {
     }
   };
 
-  // Main recommendation loading function
-  const loadRecommendations = async () => {
+  // Main recommendation loading function - modified for session caching
+  const loadRecommendations = async (forceRefresh = false) => {
     setRecommendationsLoading(true);
     
     try {
+      // Check if we have cached recommendations for this session (unless forcing refresh)
+      if (!forceRefresh) {
+        const cached = getSessionRecommendations();
+        if (cached) {
+          setRecommendedBooks(cached.recommendations);
+          setRecommendationBasis(cached.basis);
+          setRecommendationsLoading(false);
+          console.log('Loaded cached recommendations for this session');
+          return;
+        }
+      }
+      
+      // If no cached recommendations or forcing refresh, generate new ones
       const readingList = await loadUserReadingList();
       
       let recommendations = [];
@@ -354,15 +408,23 @@ export const Homepage = () => {
           .slice(0, 20);
       }
       
+      // Cache recommendations for this session
+      setSessionRecommendations(recommendations, basis);
+      
       setRecommendedBooks(recommendations);
       setRecommendationBasis(basis);
+      
+      console.log('Generated and cached new recommendations for this session');
       
     } catch (error) {
       console.error('Error loading recommendations:', error);
       // Fallback to random recommendations
       const fallbackRecs = await generateRandomRecommendations();
+      const fallbackBasis = 'Discover new books across different genres';
+      
+      setSessionRecommendations(fallbackRecs, fallbackBasis);
       setRecommendedBooks(fallbackRecs);
-      setRecommendationBasis('Discover new books across different genres');
+      setRecommendationBasis(fallbackBasis);
     } finally {
       setRecommendationsLoading(false);
     }
@@ -373,7 +435,7 @@ export const Homepage = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Load recommendations
+        // Load recommendations (will use cached if available)
         await loadRecommendations();
         
         // Load top rated books (your existing logic)
@@ -388,7 +450,7 @@ export const Homepage = () => {
     };
 
     fetchData();
-  }, [user]); // Re-run when user changes
+  }, []); // Removed user dependency to prevent reloading on user change
 
   // Scroll functions for recommendations
   const scrollLeft = () => {
@@ -415,7 +477,7 @@ export const Homepage = () => {
     navigate('/Book');
   };
 
-  // Handle add to reading list
+  // Handle add to reading list - modified to offer refresh option
   const handleAddToReadingList = async (e, book) => {
     e.stopPropagation();
     
@@ -441,12 +503,17 @@ export const Homepage = () => {
       readingList.push(bookToAdd);
       localStorage.setItem('readingList', JSON.stringify(readingList));
       
-      // Refresh recommendations after adding a book
-      setTimeout(() => {
-        loadRecommendations();
-      }, 500);
+      // Clear session cache since reading list changed
+      clearSessionRecommendations();
       
-      alert('Added to reading list! Recommendations will update shortly.');
+      // Offer to refresh recommendations
+      const shouldRefresh = window.confirm(
+        'Added to reading list! Would you like to refresh recommendations based on your updated reading list? (This will happen automatically next session)'
+      );
+      
+      if (shouldRefresh) {
+        loadRecommendations(true); // Force refresh
+      }
     } else {
       alert('Book already in reading list!');
     }
@@ -454,10 +521,22 @@ export const Homepage = () => {
     // If you have API integration, add the Supabase logic here similar to your second script
   };
 
-  // API integration functions (keeping your existing structure)
+  // Modified refresh function to force new recommendations
+  const handleRefreshRecommendations = () => {
+    clearSessionRecommendations();
+    loadRecommendations(true); // Force refresh
+  };
+
+
   const handleSearch = async (query) => {
-    setSearchQuery(query);
-    // Your existing search logic
+    if (!query.trim()) return;
+
+    navigate('/search', {
+      state: {
+        query: query.trim(),
+        filter: activeTab,
+      },
+    });
   };
 
   const handleTabChange = (tab) => {
@@ -513,50 +592,51 @@ export const Homepage = () => {
   );
 
   const RecommendationCard = ({ book }) => {
-  const title = book.title?.trim() || "No title available";
-  const author = Array.isArray(book.author_name) && book.author_name.length > 0
-    ? book.author_name.filter(name => name?.trim()).slice(0, 2).join(", ")
-    : "Unknown author";
-  const coverId = book.cover_i?.toString().trim() ? book.cover_i : null;
+    const title = book.title?.trim() || "No title available";
+    const author = Array.isArray(book.author_name) && book.author_name.length > 0
+      ? book.author_name.filter(name => name?.trim()).slice(0, 2).join(", ")
+      : "Unknown author";
+    const coverId = book.cover_i?.toString().trim() ? book.cover_i : null;
 
-  return (
-    <div className="recommendation-card" onClick={() => handleRecommendationClick(book)}>
-      <div className="recommendation-cover">
-        {coverId ? (
-          <img 
-            src={`https://covers.openlibrary.org/b/id/${coverId}-M.jpg`}
-            alt={`Cover of ${title}`} 
-            className="cover-image"
-            style={{ height: '100%', width: 'auto', maxHeight: '160px', borderRadius: '4px' }}
-            onError={(e) => {
-              e.target.style.display = 'none';
-              e.target.nextElementSibling.style.display = 'flex';
-            }}
-          />
-        ) : null}
-        <div className="cover-placeholder" style={{ display: coverId ? 'none' : 'flex' }}>
-          <span>Book Cover</span>
+    return (
+      <div className="recommendation-card" onClick={() => handleRecommendationClick(book)}>
+            <div className="recommendation-cover">
+              {coverId ? (
+                <img 
+                  src={`https://covers.openlibrary.org/b/id/${coverId}-M.jpg`}
+                  alt={`Cover of ${title}`} 
+                  className="cover-image"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextElementSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div className="cover-placeholder" style={{ display: coverId ? 'none' : 'flex' }}>
+                <span>Book Cover</span>
+              </div>
+            </div>
+
+        <div className="recommendation-info">
+          <div className='recommendation-text-group'>
+            <h4 className="recommendation-title" title={title}>
+              {truncateText(title, 35)}
+            </h4>
+            <p className="recommendation-author" title={author}>
+              by {truncateText(author, 30)}
+            </p>
+          </div>
+
+          <button 
+            className="add-to-list-btn-small"
+            onClick={(e) => handleAddToReadingList(e, book)}
+          >
+            Add to List
+          </button>
         </div>
       </div>
-
-      <div className="recommendation-info">
-        <h4 className="recommendation-title" title={title}>
-          {truncateText(title, 35)}
-        </h4>
-        <p className="recommendation-author" title={author}>
-          by {truncateText(author, 30)}
-        </p>
-
-        <button 
-          className="add-to-list-btn-small"
-          onClick={(e) => handleAddToReadingList(e, book)}
-        >
-          Add to List
-        </button>
-      </div>
-    </div>
-  );
-};
+    );
+  };
 
   // Loading component for recommendations - now shows 20 skeletons
   const RecommendationSkeleton = () => (
@@ -588,12 +668,12 @@ export const Homepage = () => {
       <div className="navigation-section">
         <div className="container">
           <div className="navigation-content">
-            <div className="tab-buttons">
+            <div className="rtab-buttons">
               {['Books', 'Authors', 'Discover'].map(tab => (
                 <button
                   key={tab}
                   onClick={() => tab === 'Discover' ? navigate('/Discover') : handleTabChange(tab)}
-                  className={`tab-button ${activeTab === tab ? 'active' : ''}`}
+                  className={`rtab-button ${activeTab === tab ? 'active' : ''}`}
                 >
                   {tab}
                 </button>
@@ -616,7 +696,7 @@ export const Homepage = () => {
                 placeholder="Search Books, Authors, and more..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch(searchQuery)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchQuery)}
                 className="search-input"
               />
             </div>
@@ -672,14 +752,14 @@ export const Homepage = () => {
             </button>
           </div>
           
-          {/* Refresh recommendations button */}
+          {/* Refresh recommendations button - modified text */}
           <div className="refresh-recommendations">
             <button 
-              onClick={loadRecommendations}
+              onClick={handleRefreshRecommendations}
               className="refresh-button"
               disabled={recommendationsLoading}
             >
-              {recommendationsLoading ? 'Updating...' : 'Refresh Recommendations'}
+              {recommendationsLoading ? 'Updating...' : 'Get New Recommendations'}
             </button>
           </div>
         </div>
