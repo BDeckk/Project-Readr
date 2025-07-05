@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from "react-router-dom"
 import { UserAuth } from '../context/AuthContext';
-import { useLocation } from 'react-router-dom';
 import './Home.css';
 
 export const Home = () => {
   // State management
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterBy, setFilterBy] = useState('All');
   const [searchResults, setSearchResults] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
@@ -16,18 +17,12 @@ export const Home = () => {
   const [classicBooks, setClassicBooks] = useState([]);
   const [booksWeLove, setBooksWeLove] = useState([]);
   const [sectionsLoading, setSectionsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState(query);
-  const [filterBy, setFilterBy] = useState(filter);
-
   
   const navigate = useNavigate();
   const trendingRef = useRef(null);
   const classicsRef = useRef(null);
   const booksWeLoveRef = useRef(null);
   const resultsPerPage = 50;
-  const location = useLocation();
-  const { query = '', filter = 'All' } = location.state || {};
-
 
   const { session, insertReadingList } = UserAuth();
   const user = session?.user;
@@ -743,10 +738,10 @@ export const Home = () => {
       {!hasSearched && (
         <div className="home-sections">
           {/* Trending Books Section */}
-          <div className="recommendations-section">
+          <div className="h-recommendations-section">
             <div className="rcontainer">
               <h2 className="h-section-title">Trending Books</h2>
-              <div className="h-recommendations-container">
+              <div className="recommendations-container">
                 <button 
                   className="scroll-button left" 
                   onClick={() => scrollSection(trendingRef, 'left')}
@@ -779,10 +774,10 @@ export const Home = () => {
           </div>
 
           {/* Classic Books Section */}
-          <div className="recommendations-section">
+          <div className="h-recommendations-section">
             <div className="rcontainer">
               <h2 className="h-section-title">Classic Books</h2>
-              <div className="h-recommendations-container">
+              <div className="recommendations-container">
                 <button 
                   className="scroll-button left" 
                   onClick={() => scrollSection(classicsRef, 'left')}
@@ -815,10 +810,10 @@ export const Home = () => {
           </div>
 
           {/* Books We Love Section */}
-          <div className="recommendations-section">
+          <div className="h-recommendations-section">
             <div className="rcontainer">
               <h2 className="h-section-title">Books We Love</h2>
-              <div className="h-recommendations-container">
+              <div className="recommendations-container">
                 <button 
                   className="scroll-button left" 
                   onClick={() => scrollSection(booksWeLoveRef, 'left')}
