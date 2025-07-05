@@ -18,6 +18,14 @@ export function HomepageNavbar() {
         navigate('/Home');
     };
 
+    const handleReadrClick = () => {
+        if (session) {
+            navigate('/Home');
+        } else {
+            navigate('/WelcomePage');
+        }
+    };
+
     const toggleDropdown = () => {
         setIsDropdownOpen(!isDropdownOpen);
     };
@@ -121,13 +129,13 @@ export function HomepageNavbar() {
         <>
             <div className="welcome-navbar">
                 <div className="nav-left">
-                    <h1>Readr</h1>
+                    <h1 onClick={handleReadrClick} style={{ cursor: 'pointer' }}>Readr</h1>
                 </div>
 
                 <div className="nav-right">
                     <div className="overlap-2">
 
-                        {location.pathname !== '/Homepage' && (
+                        {location.pathname !== '/Home' && (
                             <button className="icon-button" onClick={handleBackClick}>
                                 <img className="icon" alt="Arrow icon" src="arrow.png" />
                             </button>

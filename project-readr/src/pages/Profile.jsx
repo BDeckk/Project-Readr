@@ -381,34 +381,36 @@ export function Profile() {
                 </div>
                 
                 <div className="book-info">
-                  <h4 className="book-title" title={ratedBook.book_title}>
-                    {truncateText(ratedBook.book_title, 30)}
-                  </h4>
-                  <p className="book-author" title={ratedBook.book_author}>
-                    by {truncateText(ratedBook.book_author, 25)}
-                  </p>
-                  
-                  <div className="user-rating">
-                    <h5>My Rating</h5>
-                    <div className="rating-display">
-                      <StarRating 
-                        rating={ratedBook.rating} 
-                        readonly={true}
-                        size={18}
-                      />
-                      <span className="rating-text">{ratedBook.rating}/5</span>
-                    </div>
-                  </div>
-                  
-                  <p className="rating-date">
-                    Rated {formatDate(ratedBook.created_at)}
-                  </p>
-                  
-                  {ratedBook.review && (
-                    <p className="book-review" title={ratedBook.review}>
-                      "{truncateText(ratedBook.review, 60)}"
+                  <div className="book-content">
+                    <h4 className="book-title" title={ratedBook.book_title}>
+                      {truncateText(ratedBook.book_title, 30)}
+                    </h4>
+                    <p className="book-author" title={ratedBook.book_author}>
+                      by {truncateText(ratedBook.book_author, 25)}
                     </p>
-                  )}
+                    
+                    <div className="user-rating">
+                      <h5>My Rating</h5>
+                      <div className="rating-display">
+                        <StarRating 
+                          rating={ratedBook.rating} 
+                          readonly={true}
+                          size={18}
+                        />
+                        <span className="rating-text">{ratedBook.rating}/5</span>
+                      </div>
+                    </div>
+                    
+                    <p className="rating-date">
+                      Rated {formatDate(ratedBook.created_at)}
+                    </p>
+                    
+                    {ratedBook.review && (
+                      <p className="book-review" title={ratedBook.review}>
+                        "{truncateText(ratedBook.review, 60)}"
+                      </p>
+                    )}
+                    </div>
                 </div>
               </div>
             ))}
@@ -448,7 +450,7 @@ export function Profile() {
       );
     }
 
-    return (
+      return (
       <div className="profile-section">
         <h3>My Reading List ({readingList.length})</h3>
         <div className="reading-list-grid">
@@ -456,6 +458,7 @@ export function Profile() {
             // Get the rating data for this specific book
             const ratingData = bookRatings[book.book_key] || { overallRating: 0, totalRatings: 0 };
             
+            // Updated JSX for the reading list book card
             return (
               <div key={book.id} className="reading-list-book-card">
                 <div className="book-cover" onClick={() => handleBookClick(book)}>
@@ -482,33 +485,37 @@ export function Profile() {
                 </div>
                 
                 <div className="book-info">
-                  <h4 className="book-title" title={book.title}>
-                    {truncateText(book.title, 50)}
-                  </h4>
-                  <p className="book-author" title={book.author}>
-                    by {truncateText(book.author, 35)}
-                  </p>
-                  {book.publish_year && (
-                    <p className="book-year">({book.publish_year})</p>
-                  )}
-                  
-                  <div className="overall-rating">
-                    <div className="rating-display">
-                      <StarRating 
-                        rating={ratingData.overallRating} 
-                        readonly={true}
-                        size={16}
-                      />
-                      <span className="rating-text">
-                        {ratingData.overallRating > 0 ? `${ratingData.overallRating}/5` : 'No ratings'} 
-                        {ratingData.totalRatings > 0 && ` (${ratingData.totalRatings})`}
-                      </span>
+                  <div className="book-content">
+                    <h4 className="book-title" title={book.title} style={{ fontSize: truncateText(book.title, 30).length > 40 ? '14px' : '16px' }}>
+                      {truncateText(book.title, 22)}
+                    </h4>
+                    
+                    <p className="book-author" title={book.author}>
+                      by {truncateText(book.author, 22)}
+                    </p>
+                    
+                    {book.publish_year && (
+                      <p className="book-year">({book.publish_year})</p>
+                    )}
+                    
+                    <div className="overall-rating">
+                      <div className="rating-display">
+                        <StarRating 
+                          rating={ratingData.overallRating} 
+                          readonly={true}
+                          size={16}
+                        />
+                        <span className="rating-text">
+                          {ratingData.overallRating > 0 ? `${ratingData.overallRating}/5` : 'No ratings'} 
+                          {ratingData.totalRatings > 0 && ` (${ratingData.totalRatings})`}
+                        </span>
+                      </div>
                     </div>
+                    
+                    <p className="book-added-date">
+                      Added {formatDate(book.added_at)}
+                    </p>
                   </div>
-                  
-                  <p className="book-added-date">
-                    Added {formatDate(book.added_at)}
-                  </p>
                   
                   <div className="book-actions">
                     <button 
