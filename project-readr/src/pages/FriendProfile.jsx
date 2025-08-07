@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaFacebook, FaInstagram } from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaLock } from 'react-icons/fa';
 import { StarRating } from '../components/StarRating';
 import { UserAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
@@ -141,9 +141,9 @@ const handleUnfriend = async () => {
             </h1>
             <div className="profile-status-inmodal">
               {friend.is_private ? (
-                <span className="status-badge private-inmodal">🔒 Private Profile</span>
+                <span className="status-badge private-inmodal">🌐 Public Profile</span>
               ) : (
-                <span className="status-badge public-inmodal">🌐 Public Profile</span>
+                <span className="status-badge public-inmodal">🔒 Private Profile</span>
               )}
             </div>
           </div>
@@ -164,7 +164,20 @@ const handleUnfriend = async () => {
         </div>
       </div>
 
-      <div className="profile-content-inmodal">
+
+  {friend.is_private ? (
+    <div className="profile-content-inmodal">
+        {friend.bio && (
+          <div className="lock-profile">
+            <FaLock className='lock-icon' size={35} color='dark gray'></FaLock>
+            <p className="lock-profile-text">This Account is private</p>
+          </div>
+        )}
+
+      </div>
+  ): (
+  
+    <div className="profile-content-inmodal">
         {friend.bio && (
           <div className="profile-section-inmodal">
             <h3>About</h3>
@@ -331,7 +344,8 @@ const handleUnfriend = async () => {
             </div>
           </div>
         </div>
-      </div>
+      </div>)}
+      
     </div>
   );
 }

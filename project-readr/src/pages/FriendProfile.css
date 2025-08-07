@@ -393,6 +393,20 @@
   letter-spacing: 0.5px;
 }
 
+.lock-profile {
+  text-align: center; 
+  padding: 30px;
+  background: #fff;
+  border-radius: 10px;
+
+}
+
+.lock-profile-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #a1a0a0;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .friend-profile-inmodal {
